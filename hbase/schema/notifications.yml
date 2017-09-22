@@ -1,9 +1,9 @@
 
 notification:
-  table: Notifications
+  table: "santanderx:notifications"
   key:
     - user: String
-    - ts: long
+    - dataTs: long
     - type: String
     - resource: String
   data:

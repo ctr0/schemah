@@ -1,108 +1,138 @@
 package com.barrabes.santanderx.data.hbase.entities;
 
-
-import com.barrabes.santanderx.data.hbase.Builder;
 import com.barrabes.santanderx.data.hbase.Entity;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.util.Bytes;
+import com.barrabes.santanderx.data.hbase.HLong;
 
 /**
  * action:
- *   table: Actions
+ *   table: santanderx:actions
  *   key:
  *     - user: String
  *     - type: String
  *     - resource: String
  *   data:
- *     ts: boolean
+ *     dataTs: boolean
  */
-public class HAction implements Entity {
+public class HAction extends Entity<HAction> {
 
-    public static final String TABLE = "actions";
+    public static final String TABLE = "santanderx:actions";
 
-    // Key segmet
+    public static HLong<HAction> DATA_TS = new HLong<>(getClass(), "data", "ts");
+
+
+    // Key segment
     private String user;
 
-    // Key segmet
+    // Key segment
     private String type;
 
-    // Key segmet
+    // Key segment
     private String resource;
 
-    // Column family: data
-    private long ts;
+    // Column 'data:ts'
+    private long dataTs;
 
-    private transient String key;
-
-
+    /**
+     * Default constructor
+     */
     public HAction() {}
 
+    /**
+     * Constructor from row rey
+     */
     public HAction(String user, String type, String resource) {
         this.user = user;
         this.type = type;
         this.resource = resource;
     }
 
-    public String key() {
-        if (key == null) {
-            StringBuilder builder = new StringBuilder();
-            builder.append(user);
-            builder.append(KEY_SEP);
-            builder.append(type);
-            builder.append(KEY_SEP);
-            builder.append(resource);
-            key = builder.toString();
-        }
-        return key;
+    /**
+     * Constructor from row rey
+     *
+     * @param rowKey the row key
+     */
+    public HAction(RowKey<HAction> rowKey) {
+        String[] keyTokens = rowKey.value.split(KEY_SEP);
+        this.user = keyTokens[0];
+        this.type = keyTokens[1];
+        this.resource = keyTokens[2];
     }
 
+    /**
+     * @return the key segment 'user'
+     */
     public String getUser() {
         return user;
     }
 
+    /**
+     * @return the key segment 'type'
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * @return the key segment 'resource'
+     */
     public String getResource() {
         return resource;
     }
 
-    public long getTs() {
-        return ts;
+    /**
+     * @return the last cell valueOf for column 'data:dataTs'
+     */
+    public long getDataTs() {
+        return dataTs;
     }
 
-    public HAction setTs(long ts) {
-        this.ts = ts;
+    /**
+     * Sets the valueOf for column 'data:dataTs'
+     *
+     * @param dataTs
+     * @return this entity
+     */
+    public HAction setDataTs(long dataTs) {
+        this.dataTs = dataTs;
         return this;
     }
 
-    public PutBuilder putBuilder() {
-        return new PutBuilder();
+    /**
+     * @return The partial key '${user}KEY_SEP'
+     */
+    public Key<HAction> partialKeyUser() {
+        return partialKeyUser(user);
     }
 
-    public class PutBuilder implements Builder<Put> {
-
-        Put put = new Put(Bytes.toBytes(key()));
-
-        public PutBuilder ts() {
-            put.addImmutable(Bytes.toBytes("data"), Bytes.toBytes("ts"), Bytes.toBytes(ts));
-            return this;
-        }
-
-        public Put build() {
-            return put;
-        }
+    /**
+     * @return The partial key '${user}KEY_SEP'
+     */
+    public static Key<HAction> partialKeyUser(String user) {
+        return partialKey(user);
     }
 
-    public static HAction parse(Result result) {
-        String[] keyTokens = Bytes.toString(result.getRow()).split(KEY_SEP);
-        HAction entity = new HAction(
-                keyTokens[0],
-                keyTokens[1],
-                keyTokens[2]);
-        entity.setTs(Bytes.toLong(result.getColumnLatestCell(Bytes.toBytes("data"), Bytes.toBytes("ts")).getValueArray()));
-        return entity;
+    /**
+     * @return The partial key '${user}KEY_SEP${type}KEY_SEP'
+     */
+    public Key<HAction> partialKeyUserType() {
+        return partialKey(user, type);
+    }
+
+    /**
+     * @return The partial key '${user}KEY_SEP${type}KEY_SEP'
+     */
+    public static Key<HAction> partialKeyUserType(String user, String type) {
+        return partialKey(user, type);
+    }
+
+    /**
+     * @return The partial key '${user}KEY_SEP${type}KEY_SEP'
+     */
+    public static RowKey<HAction> rowKey(String user, String type, String resource) {
+        return Entity.rowKey(user, type, resource);
+    }
+
+    protected final Object[] keyValues() {
+        return new Object[] { user, type, resource };
     }
 }

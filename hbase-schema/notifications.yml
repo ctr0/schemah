@@ -1,0 +1,10 @@
+
+notification:
+  table: Notifications
+  key:
+    - user: String
+    - ts: long
+    - type: String
+    - resource: String
+  data:
+    readed: boolean

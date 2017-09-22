@@ -1,0 +1,9 @@
+
+action:
+  table: Actions
+  key:
+    - user: String
+    - type: String
+    - resource: String
+  data:
+    ts: boolean
